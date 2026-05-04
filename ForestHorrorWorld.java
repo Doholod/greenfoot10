@@ -18,8 +18,8 @@ public class ForestHorrorWorld extends World
     private static final double MOUSE_SENSITIVITY = 0.0065;
     private static final int MOUSE_EDGE_ZONE = 78;
     private static final double TWO_PI = Math.PI * 2.0;
-    private static final String BOSS_IMAGE_FILE = "2025-05-02 10.08.50.jpg"; //boss moving closer ambient
-    private static final String BOSS_MUSIC_FILE = "audio/mob.mp3";
+    private static final String BOSS_IMAGE_FILE = "1.jpg"; //boss moving closer ambient
+    private static final String BOSS_MUSIC_FILE = "audio/mob1.mp3";
     private static final double BOSS_MUSIC_RANGE = 15.5;
 
     private ForestMap forest;
@@ -210,7 +210,7 @@ public class ForestHorrorWorld extends World
         if (Greenfoot.isKeyDown("space") || Greenfoot.mouseClicked(null)) {
             fireWeapon();
         }
-    }
+    
     }
 
     private void updateMouseLook()
