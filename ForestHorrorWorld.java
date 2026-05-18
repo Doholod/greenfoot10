@@ -21,6 +21,11 @@ public class ForestHorrorWorld extends World
     private static final String BOSS_IMAGE_FILE = "1.jpg"; //boss moving closer ambient
     private static final String BOSS_MUSIC_FILE = "audio/mob2.mp3";
     private static final double BOSS_MUSIC_RANGE = 15.5;
+    private static final String[] KEY_FORWARD = {"w", "ц"};
+    private static final String[] KEY_BACKWARD = {"s", "ы"};
+    private static final String[] KEY_TURN_LEFT = {"a", "ф"};
+    private static final String[] KEY_TURN_RIGHT = {"d", "в"};
+    private static final String[] KEY_RESTART = {"r", "к"};
 
     private ForestMap forest;
     private HorrorPlayer player;
@@ -63,7 +68,7 @@ public class ForestHorrorWorld extends World
     {
         tick++;
         //global reset key
-        if ((dead || won) && Greenfoot.isKeyDown("r")) {
+        if ((dead || won) && isAnyKeyDown(KEY_RESTART)) {
             restart();
             return;
         }
@@ -182,10 +187,10 @@ public class ForestHorrorWorld extends World
     private void handleInput()
     {
         // manual keyboard turning
-        if (Greenfoot.isKeyDown("a")) {
+        if (isAnyKeyDown(KEY_TURN_LEFT)) {
             player.angle -= TURN_SPEED;
         }
-        if (Greenfoot.isKeyDown("d")) {
+        if (isAnyKeyDown(KEY_TURN_RIGHT)) {
             player.angle += TURN_SPEED;
         }
         
@@ -193,10 +198,10 @@ public class ForestHorrorWorld extends World
         player.angle = normalizeAngle(player.angle); // wrap around to keep it clean
 
         double forward = 0.0;
-        if (Greenfoot.isKeyDown("w")) {
+        if (isAnyKeyDown(KEY_FORWARD)) {
             forward += MOVE_SPEED;
         }
-        if (Greenfoot.isKeyDown("s")) {
+        if (isAnyKeyDown(KEY_BACKWARD)) {
             // going back is slightly slower than walking forward
             forward -= MOVE_SPEED * 0.72;
         }
@@ -211,6 +216,16 @@ public class ForestHorrorWorld extends World
             fireWeapon();
         }
     
+    }
+
+    private boolean isAnyKeyDown(String[] keys)
+    {
+        for (int i = 0; i < keys.length; i++) {
+            if (Greenfoot.isKeyDown(keys[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void updateMouseLook()
