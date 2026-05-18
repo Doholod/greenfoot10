@@ -21,6 +21,7 @@ public class ForestHorrorWorld extends World
     private static final String BOSS_IMAGE_FILE = "1.jpg"; //boss moving closer ambient
     private static final String BOSS_MUSIC_FILE = "audio/mob2.mp3";
     private static final double BOSS_MUSIC_RANGE = 15.5;
+    private static final int DOOR_TEXTURE_SIZE = 96;
     private static final String[] KEY_FORWARD = {"w", "ц"};
     private static final String[] KEY_BACKWARD = {"s", "ы"};
     private static final String[] KEY_TURN_LEFT = {"a", "ф"};
@@ -34,6 +35,7 @@ public class ForestHorrorWorld extends World
     private GreenfootImage frame;
     private GreenfootImage bossFace;
     private GreenfootImage bossScreamerFace;
+    private GreenfootImage doorTexture;
     private GreenfootSound bossMusic;
     private final double[] zBuffer = new double[SCREEN_W]; // needs to be updated every frame for sprites
     private final Random random = new Random(7331);
@@ -123,6 +125,7 @@ public class ForestHorrorWorld extends World
         pickups = forest.createPickups();
         frame = new GreenfootImage(SCREEN_W, SCREEN_H);
         loadBossAssets();
+        loadDoorTexture();
 
         tick = 0;
         kills = 0;
@@ -167,6 +170,16 @@ public class ForestHorrorWorld extends World
         } catch (Throwable ex) {
             bossMusic = null;
         }
+    }
+
+    private void loadDoorTexture()
+    {
+        doorTexture = new GreenfootImage(DOOR_TEXTURE_SIZE, DOOR_TEXTURE_SIZE);
+        doorTexture.setColor(new Color(255, 255, 255));
+        doorTexture.fillRect(0, 0, DOOR_TEXTURE_SIZE, DOOR_TEXTURE_SIZE);
+        doorTexture.setColor(new Color(24, 24, 24));
+        doorTexture.drawRect(0, 0, DOOR_TEXTURE_SIZE - 1, DOOR_TEXTURE_SIZE - 1);
+        doorTexture.drawString("DOOR HERE", 17, DOOR_TEXTURE_SIZE / 2 + 4);
     }
 
     //make creepy creepy image without photoshop ediiting (to lazy for it)
@@ -1406,7 +1419,7 @@ public class ForestHorrorWorld extends World
         double fog = Math.min(0.70, depth * 0.045);
 
         if (pickup.type == HorrorPickup.GATE) {
-            drawGateStripe(x, top, height, abs, light, fog);
+            drawGateStripe(x, top, height, relative, abs, light, fog);
             return;
         }
 
@@ -1442,22 +1455,32 @@ public class ForestHorrorWorld extends World
         }
     }
 
-    private void drawGateStripe(int x, int top, int height, double abs, double light, double fog)
+    private void drawGateStripe(int x, int top, int height, double relative, double abs, double light, double fog)
     {
         if (abs > 0.68) {
             return;
         }
 
-        boolean open = isGateOpen();
-        Color portal = open ? new Color(41, 223, 145) : new Color(102, 31, 46);
-        Color mixed = blend(shade(portal, light), new Color(12, 12, 14), fog);
-        double curve = Math.sqrt(1.0 - (abs / 0.68) * (abs / 0.68));
-        int centerY = top + height / 2;
-        int radius = (int)(height * 0.48 * curve);
-        fillRectClipped(x, centerY - radius, COLUMN_WIDTH, radius * 2, mixed);
+        if (doorTexture == null) {
+            loadDoorTexture();
+        }
 
-        if (abs > 0.50) {
-            fillRectClipped(x, top + (int)(height * 0.08), COLUMN_WIDTH, (int)(height * 0.86), new Color(23, 18, 17));
+        int sourceX = clampIndex((int)((relative + 1.0) * 0.5 * (doorTexture.getWidth() - 1)), doorTexture.getWidth());
+        int drawTop = Math.max(0, top);
+        int drawBottom = Math.min(SCREEN_H, top + height);
+        int step = Math.max(1, height / DOOR_TEXTURE_SIZE);
+
+        for (int y = drawTop; y < drawBottom; y += step) {
+            double textureY = (y - top) / (double)Math.max(1, height);
+            int sourceY = clampIndex((int)(textureY * (doorTexture.getHeight() - 1)), doorTexture.getHeight());
+            Color sample = doorTexture.getColorAt(sourceX, sourceY);
+            Color lit = blend(shade(sample, light), new Color(12, 12, 14), fog);
+            fillRectClipped(x, y, COLUMN_WIDTH, step, lit);
+        }
+
+        if (abs > 0.61) {
+            Color edge = isGateOpen() ? new Color(53, 224, 143) : new Color(134, 38, 47);
+            fillRectClipped(x, top, COLUMN_WIDTH, height, edge);
         }
     }
 
@@ -1524,10 +1547,10 @@ public class ForestHorrorWorld extends World
 
         if (isGateOpen()) {
             frame.setColor(new Color(79, 238, 158));
-            frame.drawString("GATE OPEN", 604, SCREEN_H - 10);
+            frame.drawString("DOOR OPEN", 604, SCREEN_H - 10);
         } else {
             frame.setColor(new Color(155, 168, 158));
-            frame.drawString("RELIC " + player.relics + "/1", 604, SCREEN_H - 10);
+            frame.drawString("COLLECT " + collectedCollectables() + "/" + totalCollectables(), 604, SCREEN_H - 10);
         }
 
         int cx = SCREEN_W / 2;
@@ -1765,7 +1788,35 @@ public class ForestHorrorWorld extends World
 
     private boolean isGateOpen()
     {
-        return kills >= totalDemons && player.relics > 0;
+        return collectedCollectables() >= totalCollectables();
+    }
+
+    private int collectedCollectables()
+    {
+        int collected = 0;
+        for (int i = 0; i < pickups.size(); i++) {
+            HorrorPickup pickup = pickups.get(i);
+            if (isCollectable(pickup) && pickup.taken) {
+                collected++;
+            }
+        }
+        return collected;
+    }
+
+    private int totalCollectables()
+    {
+        int total = 0;
+        for (int i = 0; i < pickups.size(); i++) {
+            if (isCollectable(pickups.get(i))) {
+                total++;
+            }
+        }
+        return total;
+    }
+
+    private boolean isCollectable(HorrorPickup pickup)
+    {
+        return pickup.type != HorrorPickup.GATE;
     }
 
     private boolean lineClear(double ax, double ay, double bx, double by)
