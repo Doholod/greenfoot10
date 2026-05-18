@@ -9,7 +9,7 @@ public class ForestHorrorWorld extends World
     private static final int SCREEN_W = 1400;
     private static final int SCREEN_H = 700;
     private static final int HALF_H = SCREEN_H / 2; //1 for more fps lol
-    private static final int COLUMN_WIDTH = 2;
+    private static final int COLUMN_WIDTH = 1;
     private static final double FOV = Math.toRadians(68.0);
     private static final double CAMERA_PLANE = Math.tan(FOV / 2.0);
     private static final double PLAYER_RADIUS = 0.18;
@@ -19,7 +19,7 @@ public class ForestHorrorWorld extends World
     private static final int MOUSE_EDGE_ZONE = 78;
     private static final double TWO_PI = Math.PI * 2.0;
     private static final String BOSS_IMAGE_FILE = "1.jpg"; //boss moving closer ambient
-    private static final String BOSS_MUSIC_FILE = "audio/mob1.mp3";
+    private static final String BOSS_MUSIC_FILE = "audio/mob2.mp3";
     private static final double BOSS_MUSIC_RANGE = 15.5;
 
     private ForestMap forest;
@@ -980,11 +980,6 @@ public class ForestHorrorWorld extends World
             RayHit hit = castRay(rayDirX, rayDirY);
 
             int lineHeight = (int)(SCREEN_H / Math.max(0.05, hit.distance));
-            if (hit.cell == ForestMap.ANCIENT_TREE) {
-                lineHeight = (int)(lineHeight * 1.18);
-            } else if (hit.cell == ForestMap.STONE) {
-                lineHeight = (int)(lineHeight * 0.92);
-            }
 
             int drawStart = Math.max(0, -lineHeight / 2 + HALF_H);
             int drawEnd = Math.min(SCREEN_H - 1, lineHeight / 2 + HALF_H);
