@@ -114,6 +114,7 @@ public class ForestHorrorWorld extends World
         render();
     }
 
+    
     private void restart()
     {
         stopBossMusic();
@@ -174,12 +175,17 @@ public class ForestHorrorWorld extends World
 
     private void loadDoorTexture()
     {
-        doorTexture = new GreenfootImage(DOOR_TEXTURE_SIZE, DOOR_TEXTURE_SIZE);
-        doorTexture.setColor(new Color(255, 255, 255));
-        doorTexture.fillRect(0, 0, DOOR_TEXTURE_SIZE, DOOR_TEXTURE_SIZE);
-        doorTexture.setColor(new Color(24, 24, 24));
-        doorTexture.drawRect(0, 0, DOOR_TEXTURE_SIZE - 1, DOOR_TEXTURE_SIZE - 1);
-        doorTexture.drawString("DOOR HERE", 17, DOOR_TEXTURE_SIZE / 2 + 4);
+        //WTF WHY DOOR NOT OPEN????
+        if (!isGateOpen())
+            doorTexture = new GreenfootImage("CloseDoor.png");
+        else
+            doorTexture = new GreenfootImage("OpenDoor.png");
+        //doorTexture.scale(DOOR_TEXTURE_SIZE, DOOR_TEXTURE_SIZE);
+        //doorTexture.setColor(new Color(255, 255, 255));
+        //doorTexture.fillRect(0, 0, DOOR_TEXTURE_SIZE, DOOR_TEXTURE_SIZE);
+        //doorTexture.setColor(new Color(24, 24, 24));
+        //doorTexture.drawRect(0, 0, DOOR_TEXTURE_SIZE - 1, DOOR_TEXTURE_SIZE - 1);
+        // doorTexture.drawString("DOOR HERE", 17, DOOR_TEXTURE_SIZE / 2 + 4);
     }
 
     //make creepy creepy image without photoshop ediiting (to lazy for it)
@@ -877,7 +883,10 @@ public class ForestHorrorWorld extends World
         drawWeapon();
         drawHud();
         drawMiniMap();
-        drawVignette();
+
+        //Draw oval of the flashlight
+        //drawVignette();
+
         if (hurtTimer > 0 || fearPulse > 0) {
             drawFearOverlay();
         }
@@ -892,7 +901,6 @@ public class ForestHorrorWorld extends World
         }
         setBackground(frame);
     }
-
     private void drawBackdrop()
     {
 
@@ -1460,7 +1468,6 @@ public class ForestHorrorWorld extends World
         if (abs > 0.68) {
             return;
         }
-
         if (doorTexture == null) {
             loadDoorTexture();
         }
@@ -1479,6 +1486,7 @@ public class ForestHorrorWorld extends World
         }
 
         if (abs > 0.61) {
+            loadDoorTexture();
             Color edge = isGateOpen() ? new Color(53, 224, 143) : new Color(134, 38, 47);
             fillRectClipped(x, top, COLUMN_WIDTH, height, edge);
         }
@@ -1650,18 +1658,19 @@ public class ForestHorrorWorld extends World
         frame.drawRect(x, y, width, height);
     }
 
-    private void drawVignette()
-    {
-        for (int i = 0; i < 72; i += 4) {
-            int alpha = 9 + i / 4;
-            frame.setColor(new Color(0, 0, 0, alpha));
-            frame.drawRect(i, i, SCREEN_W - i * 2 - 1, SCREEN_H - i * 2 - 1);
-        }
-
-        int beamW = 290 + (int)(Math.sin(tick * 0.08) * 12);
-        frame.setColor(new Color(122, 139, 122, 16));
-        frame.fillOval(SCREEN_W / 2 - beamW / 2, HALF_H - 95, beamW, 215);
-    }
+    //Draw The oval of the flashlight
+    // private void drawVignette()
+    // {
+    //     return;
+    //     for (int i = 0; i < 72; i += 4) {
+    //         int alpha = 9 + i / 4;
+    //         frame.setColor(new Color(0, 0, 0, alpha));
+    //         frame.drawRect(i, i, SCREEN_W - i * 2 - 1, SCREEN_H - i * 2 - 1);
+    //     }
+    //     int beamW = 290 + (int)(Math.sin(tick * 0.08) * 12);
+    //     frame.setColor(new Color(122, 139, 122, 16));
+    //     frame.fillOval(SCREEN_W / 2 - beamW / 2, HALF_H - 95, beamW, 215);
+    // }
 
     private void drawFearOverlay()
     {
