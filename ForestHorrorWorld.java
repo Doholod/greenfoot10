@@ -67,6 +67,7 @@ public class ForestHorrorWorld extends World
     {
         super(SCREEN_W, SCREEN_H, 1);
         Greenfoot.setSpeed(50);
+
         try {
             // Создаем робота для управления мышью
             robot = new Robot();
@@ -1551,7 +1552,7 @@ public class ForestHorrorWorld extends World
         frame.setColor(new Color(11, 12, 14));
         frame.fillRect(SCREEN_W / 2 - 9, baseY - 52, 18, 13);
 
-        if (muzzleTimer > 0 && player.ammo >= 0) {
+        if (muzzleTimer > 0 && player.ammo > 0) {
             frame.setColor(new Color(255, 235, 130, 210));
             frame.fillOval(SCREEN_W / 2 - 26, baseY - 88, 52, 54);
             frame.setColor(new Color(255, 113, 48));
