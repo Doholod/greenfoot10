@@ -8,8 +8,8 @@ import java.awt.Robot;
 
 public class ForestHorrorWorld extends World
 {
-    private static final int SCREEN_W = 1400;
-    private static final int SCREEN_H = 700;
+    private static int SCREEN_W = 1400;
+    private static int SCREEN_H = 700;
     private static final int HALF_H = SCREEN_H / 2; //1 for more fps lol
     private static final int COLUMN_WIDTH = 1;
     private static final double FOV = Math.toRadians(68.0);
@@ -39,6 +39,7 @@ public class ForestHorrorWorld extends World
     private GreenfootImage bossScreamerFace;
     private GreenfootImage doorTexture;
     private GreenfootSound bossMusic;
+    private MenuWorld menu;
     private final double[] zBuffer = new double[SCREEN_W]; // needs to be updated every frame for sprites
     private final Random random = new Random(7331);
 
@@ -63,9 +64,12 @@ public class ForestHorrorWorld extends World
     private Robot robot;
     private boolean isGameActive = false;
 
-    public ForestHorrorWorld()
+    public ForestHorrorWorld(MenuWorld menu, int SCREEN_W, int SCREEN_H)
     {
         super(SCREEN_W, SCREEN_H, 1);
+        this.SCREEN_W = SCREEN_W;
+        this.SCREEN_H = SCREEN_H;
+        this.menu = menu;
         Greenfoot.setSpeed(50);
 
         try {
@@ -79,6 +83,10 @@ public class ForestHorrorWorld extends World
 
     public void act()
     {
+        if (Greenfoot.isKeyDown("escape"))
+        {   
+            Greenfoot.setWorld(this.menu); 
+        }
         // Если игра запущена, принудительно убираем мышь в левый верхний угол экрана (0, 0)
         if (isGameActive && robot != null) {
             robot.mouseMove(0, 0);
