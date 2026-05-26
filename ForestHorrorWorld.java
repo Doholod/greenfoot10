@@ -85,6 +85,9 @@ public class ForestHorrorWorld extends World
         }
         tick++;
         //global reset key
+        if (dead || won){
+            isGameActive = false;
+        }
         if ((dead || won) && isAnyKeyDown(KEY_RESTART)) {
             restart();
             return;
@@ -102,7 +105,6 @@ public class ForestHorrorWorld extends World
             updateDemons();
             updatePickups();
             updateNerve();
-            isGameActive = false;
         }
 
 
@@ -170,6 +172,7 @@ public class ForestHorrorWorld extends World
         bossDistance = 999.0;
         dead = false;
         won = false;
+        isGameActive = true;
         render();
     }
 
