@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 
+import java.awt.Robot;
+
 public class ForestHorrorWorld extends World
 {
     private static final int SCREEN_W = 1400;
@@ -58,16 +60,28 @@ public class ForestHorrorWorld extends World
     private double bossDistance;
     private boolean dead;
     private boolean won;
+    private Robot robot;
+    private boolean isGameActive = false;
 
     public ForestHorrorWorld()
     {
         super(SCREEN_W, SCREEN_H, 1);
         Greenfoot.setSpeed(50);
+        try {
+            // Создаем робота для управления мышью
+            robot = new Robot();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         restart();
     }
 
     public void act()
     {
+        // Если игра запущена, принудительно убираем мышь в левый верхний угол экрана (0, 0)
+        if (isGameActive && robot != null) {
+            robot.mouseMove(0, 0);
+        }
         tick++;
         //global reset key
         if ((dead || won) && isAnyKeyDown(KEY_RESTART)) {
@@ -87,6 +101,7 @@ public class ForestHorrorWorld extends World
             updateDemons();
             updatePickups();
             updateNerve();
+            isGameActive = false;
         }
 
 
@@ -114,7 +129,15 @@ public class ForestHorrorWorld extends World
         render();
     }
 
-    
+    // Этот метод запускается, когда нажимается кнопка RUN
+    public void started() {
+        isGameActive = true;
+    }
+
+    // Этот метод запускается, когда нажимается кнопка PAUSE
+    public void stopped() {
+        isGameActive = false;
+    }
     private void restart()
     {
         stopBossMusic();
