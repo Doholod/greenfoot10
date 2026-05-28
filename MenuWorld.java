@@ -1,5 +1,5 @@
 import greenfoot.*;
-import java.lang.Math;;
+import java.lang.Math;
 
 public class MenuWorld extends World
 {
@@ -7,7 +7,9 @@ public class MenuWorld extends World
     private static ForestHorrorWorld gameWorld;
     private static final int SCREEN_H = 700;
     private static final int SCREEN_W = 1400;
-    private static final int COOLDOWN_MAX = 60;
+    private static final int ITEM_CONTINUE = 0;
+    private static final int ITEM_VOLUME = 1;
+    private static final int ITEM_EXIT = 2;
     // Переменные для хранения настроек меню (например, громкость звука или сложность)
     private int soundVolume = 80; 
 
@@ -16,7 +18,6 @@ public class MenuWorld extends World
     private int selectedIndex = 0; // Какая кнопка выбрана стрелочками
     
     private int glitchTimer = 0; // Эффект мерцания для хоррор-атмосферы
-    private int cooldown_current = 0;
 
     public MenuWorld()
     {    
@@ -24,32 +25,26 @@ public class MenuWorld extends World
         renderMenu();
     }
 
-private void handleInput()
+    private void handleInput()
     {
-        if (cooldown_current<=0){
-            // Навигация стрелочками (вверх/вниз)
-            if (Greenfoot.isKeyDown("up") || Greenfoot.isKeyDown("w")) {
-                selectedIndex = (selectedIndex - 1 + menuItems.length) % menuItems.length;
-                cooldown_current = COOLDOWN_MAX;
-                renderMenu();
-            }
-            if (Greenfoot.isKeyDown("down") || Greenfoot.isKeyDown("s")) {
-                selectedIndex = (selectedIndex + 1) % menuItems.length;
-                cooldown_current = COOLDOWN_MAX;
-                renderMenu();
-            }
+        String key = Greenfoot.getKey();
+        if (key == null) {
+            return;
         }
+        key = key.toLowerCase();
 
-        // Изменение параметров внутри пунктов меню (влево/вправо)
-        if (Greenfoot.isKeyDown("left") || Greenfoot.isKeyDown("a")) {
+        // Навигация стрелочками, WASD и русской раскладкой
+        if (isUpKey(key)) {
+            selectedIndex = (selectedIndex - 1 + menuItems.length) % menuItems.length;
+            renderMenu();
+        } else if (isDownKey(key)) {
+            selectedIndex = (selectedIndex + 1) % menuItems.length;
+            renderMenu();
+        } else if (isLeftKey(key)) {
             modifySetting(-1);
-        }
-        if (Greenfoot.isKeyDown("right") || Greenfoot.isKeyDown("d")) {
+        } else if (isRightKey(key)) {
             modifySetting(1);
-        }
-
-        // Активация выбранного пункта (Enter или Пробел)
-        if (Greenfoot.isKeyDown("enter") || Greenfoot.isKeyDown("space")) {
+        } else if (isConfirmKey(key)) {
             executeAction();
         }
     }
@@ -59,10 +54,10 @@ private void handleInput()
      */
     private void modifySetting(int dir)
     {
-        if (selectedIndex == 1) { // Громкость
-            soundVolume = Math.max(0, Math.min(100, soundVolume + (dir * 1)));
+        if (selectedIndex == ITEM_VOLUME) { // Громкость
+            soundVolume = Math.max(0, Math.min(100, soundVolume + (dir * 5)));
+            renderMenu();
         }
-        renderMenu();
     }
 
     /**
@@ -70,15 +65,40 @@ private void handleInput()
      */
     private void executeAction()
     {
-        if (selectedIndex == 0) { // Запуск / Продолжение игры
+        if (selectedIndex == ITEM_CONTINUE) { // Запуск / Продолжение игры
             if (gameWorld == null) {
                 gameWorld = new ForestHorrorWorld(this, SCREEN_W, SCREEN_H);
             }
             Greenfoot.setWorld(gameWorld);
         }
-        else if (selectedIndex == 3) { // Выход из игры
+        else if (selectedIndex == ITEM_EXIT) { // Выход из игры
             Greenfoot.stop();
         }
+    }
+
+    private boolean isUpKey(String key)
+    {
+        return key.equals("up") || key.equals("w") || key.equals("ц");
+    }
+
+    private boolean isDownKey(String key)
+    {
+        return key.equals("down") || key.equals("s") || key.equals("ы");
+    }
+
+    private boolean isLeftKey(String key)
+    {
+        return key.equals("left") || key.equals("a") || key.equals("ф");
+    }
+
+    private boolean isRightKey(String key)
+    {
+        return key.equals("right") || key.equals("d") || key.equals("в");
+    }
+
+    private boolean isConfirmKey(String key)
+    {
+        return key.equals("enter") || key.equals("space");
     }
 
     private void renderMenu()
@@ -148,13 +168,12 @@ private void handleInput()
         // 4. Панель подсказок внизу экрана
         bg.setFont(new Font("Courier New", false, false, 16));
         bg.setColor(new Color(70, 70, 80));
-        bg.drawString("Управление: [W/S] или [Стрелочки] - выбор | [A/D] - изменение настроек | [ENTER] - подтверждение", 220, 640);
+        bg.drawString("Управление: [W/S] или [Стрелочки] - выбор | [A/D] - изменение настроек | [ENTER/SPACE] - подтверждение", 160, 640);
         bg.drawString("Во время игры нажмите [ESC], чтобы вернуться сюда", 445, 665);
     }
 
     public void act()
     {
-        cooldown_current--;
         handleInput();
         // Каждые несколько кадров обновляем меню ради эффекта мерцания текста
         glitchTimer++;
