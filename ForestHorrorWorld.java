@@ -4,10 +4,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 
+import java.awt.Robot;
+
 public class ForestHorrorWorld extends World
 {
-    private static final int SCREEN_W = 1400;
-    private static final int SCREEN_H = 700;
+    private static int SCREEN_W = 1400;
+    private static int SCREEN_H = 700;
     private static final int HALF_H = SCREEN_H / 2; //1 for more fps lol
     private static final int COLUMN_WIDTH = 1;
     private static final double FOV = Math.toRadians(68.0);
@@ -37,6 +39,7 @@ public class ForestHorrorWorld extends World
     private GreenfootImage bossScreamerFace;
     private GreenfootImage doorTexture;
     private GreenfootSound bossMusic;
+    private MenuWorld menu;
     private final double[] zBuffer = new double[SCREEN_W]; // needs to be updated every frame for sprites
     private final Random random = new Random(7331);
 
@@ -58,18 +61,41 @@ public class ForestHorrorWorld extends World
     private double bossDistance;
     private boolean dead;
     private boolean won;
+    private Robot robot;
+    private boolean isGameActive = false;
 
-    public ForestHorrorWorld()
+    public ForestHorrorWorld(MenuWorld menu, int SCREEN_W, int SCREEN_H)
     {
         super(SCREEN_W, SCREEN_H, 1);
+        this.SCREEN_W = SCREEN_W;
+        this.SCREEN_H = SCREEN_H;
+        this.menu = menu;
         Greenfoot.setSpeed(50);
+
+        try {
+            // Создаем робота для управления мышью
+            robot = new Robot();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         restart();
     }
 
     public void act()
     {
+        if (Greenfoot.isKeyDown("escape"))
+        {   
+            Greenfoot.setWorld(this.menu); 
+        }
+        // Если игра запущена, принудительно убираем мышь в левый верхний угол экрана (0, 0)
+        if (isGameActive && robot != null) {
+            robot.mouseMove(0, 0);
+        }
         tick++;
         //global reset key
+        if (dead || won){
+            isGameActive = false;
+        }
         if ((dead || won) && isAnyKeyDown(KEY_RESTART)) {
             restart();
             return;
@@ -114,7 +140,15 @@ public class ForestHorrorWorld extends World
         render();
     }
 
-    
+    // Этот метод запускается, когда нажимается кнопка RUN
+    public void started() {
+        isGameActive = true;
+    }
+
+    // Этот метод запускается, когда нажимается кнопка PAUSE
+    public void stopped() {
+        isGameActive = false;
+    }
     private void restart()
     {
         stopBossMusic();
@@ -146,6 +180,7 @@ public class ForestHorrorWorld extends World
         bossDistance = 999.0;
         dead = false;
         won = false;
+        isGameActive = true;
         render();
     }
 
@@ -1528,7 +1563,7 @@ public class ForestHorrorWorld extends World
         frame.setColor(new Color(11, 12, 14));
         frame.fillRect(SCREEN_W / 2 - 9, baseY - 52, 18, 13);
 
-        if (muzzleTimer > 0 && player.ammo >= 0) {
+        if (muzzleTimer > 0 && player.ammo > 0) {
             frame.setColor(new Color(255, 235, 130, 210));
             frame.fillOval(SCREEN_W / 2 - 26, baseY - 88, 52, 54);
             frame.setColor(new Color(255, 113, 48));
